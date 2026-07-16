@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Grand Theft Allowance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: #f4f6f8; color: #222; }
+        .header {
+            background: #1a1a2e;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        .header h1 { font-size: 28px; letter-spacing: 4px; }
+        .header p { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            background: #16213e;
+        }
+        .nav button {
+            background: none;
+            border: none;
+            color: #aaa;
+            padding: 12px 24px;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s;
+        }
+        .nav button:hover { color: #fff; }
+        .nav button.active { color: #fff; border-bottom: 2px solid #4ecca3; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #1a1a2e;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .form-group { display: flex; flex-direction: column; flex: 1; min-width: 140px; }
+        .form-group label { font-size: 12px; color: #666; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4ecca3;
+        }
+
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background: #4ecca3; color: #1a1a2e; font-weight: bold; }
+        .btn-danger { background: #e74c3c; color: #fff; }
+        .btn-outline {
+            background: none;
+            border: 1px solid #ddd;
+            color: #555;
+        }
+        .btn-outline.active { border-color: #4ecca3; color: #1a1a2e; background: #e8f8f0; }
+
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .summary-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .summary-item {
+            flex: 1;
+            background: #fff;
+            border-radius: 8px;
+            padding: 14px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .summary-item .label { font-size: 12px; color: #888; margin-bottom: 4px; }
+        .summary-item .value { font-size: 20px; font-weight: bold; }
+        .summary-item .value.deposit { color: #27ae60; }
+        .summary-item .value.payment { color: #e74c3c; }
+        .summary-item .value.balance { color: #1a1a2e; }
+
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        thead th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 500;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tbody tr:hover { background: #f8fffe; }
+
+        .amount-deposit { color: #27ae60; font-weight: 500; }
+        .amount-payment { color: #e74c3c; font-weight: 500; }
+
+        .type-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .type-deposit { background: #e8f8f0; color: #1e8449; }
+        .type-debit { background: #fdecea; color: #c0392b; }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+        }
+        .delete-btn:hover { color: #e74c3c; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 15px;
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .report-btn {
+            padding: 14px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s;
+        }
+        .report-btn:hover { border-color: #4ecca3; background: #f8fffe; }
+        .report-btn .report-title { font-size: 14px; font-weight: 500; color: #1a1a2e; }
+        .report-btn .report-desc { font-size: 12px; color: #888; margin-top: 2px; }
+
+        .search-section { margin-top: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>GRAND THEFT ALLOWANCE</h1>
+    <p>Personal Transaction Tracker</p>
+</div>
+
+<div class="nav">
+    <button class="active" onclick="showScreen('home')">Home</button>
+    <button onclick="showScreen('ledger')">Ledger</button>
+    <button onclick="showScreen('reports')">Reports</button>
+</div>
+
+<div class="container">
+
+    <!-- HOME SCREEN -->
+    <div id="screen-home" class="screen active">
+
+        <div class="summary-bar">
+            <div class="summary-item">
+                <div class="label">Total deposits</div>
+                <div class="value deposit" id="sum-deposits">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Total payments</div>
+                <div class="value payment" id="sum-payments">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Current balance</div>
+                <div class="value balance" id="sum-balance">$0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Log a deposit</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="dep-desc" type="text" placeholder="e.g. Paycheck">
+                </div>
+                <div class="form-group">
+                    <label>Vendor</label>
+                    <input id="dep-vendor" type="text" placeholder="e.g. Employer Inc">
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input id="dep-amount" type="number" step="0.01" placeholder="0.00">
+                </div>
+                <button class="btn btn-primary" onclick="submitDeposit()">Add deposit</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Log a payment</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="pay-desc" type="text" placeholder="e.g. Groceries">
+                </div>
+                <div class="form-group">
+                    <label>Vendor</label>
+                    <input id="pay-vendor" type="text" placeholder="e.g. Whole Foods">
+                </div>
+                <div class="form-group">
+                    <label>Amount</label>
+                    <input id="pay-amount" type="number" step="0.01" placeholder="0.00">
+                </div>
+                <button class="btn btn-danger" onclick="submitPayment()">Add payment</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Recent transactions</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Vendor</th>
+                        <th>Amount</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="home-transactions"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEDGER SCREEN -->
+    <div id="screen-ledger" class="screen">
+
+        <div class="filter-bar">
+            <button class="btn btn-outline active" onclick="filterLedger('all', this)">All</button>
+            <button class="btn btn-outline" onclick="filterLedger('deposits', this)">Deposits</button>
+            <button class="btn btn-outline" onclick="filterLedger('payments', this)">Payments</button>
+            <input type="text" id="vendor-search" placeholder="Search by vendor..."
+                   style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;flex:1;min-width:160px;"
+                   oninput="searchVendor()">
+        </div>
+
+        <div class="summary-bar">
+            <div class="summary-item">
+                <div class="label">Deposits</div>
+                <div class="value deposit" id="ledger-deposits">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Payments</div>
+                <div class="value payment" id="ledger-payments">$0.00</div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Balance</div>
+                <div class="value balance" id="ledger-balance">$0.00</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Vendor</th>
+                        <th>Amount</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="ledger-transactions"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- REPORTS SCREEN -->
+    <div id="screen-reports" class="screen">
+
+        <div class="report-grid">
+            <div class="report-btn" onclick="runReport('month-to-date')">
+                <div class="report-title">Month to date</div>
+                <div class="report-desc">All transactions this month</div>
+            </div>
+            <div class="report-btn" onclick="runReport('previous-month')">
+                <div class="report-title">Previous month</div>
+                <div class="report-desc">Last month's transactions</div>
+            </div>
+            <div class="report-btn" onclick="runReport('year-to-date')">
+                <div class="report-title">Year to date</div>
+                <div class="report-desc">All transactions this year</div>
+            </div>
+            <div class="report-btn" onclick="runReport('previous-year')">
+                <div class="report-title">Previous year</div>
+                <div class="report-desc">Last year's transactions</div>
+            </div>
+        </div>
+
+        <div class="card search-section">
+            <h3>Custom search</h3>
+            <p style="font-size:12px;color:#888;margin-bottom:12px;">
+                Leave any field blank to skip it.
+            </p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start date</label>
+                    <input id="search-start" type="date">
+                </div>
+                <div class="form-group">
+                    <label>End date</label>
+                    <input id="search-end" type="date">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input id="search-desc" type="text" placeholder="e.g. groceries">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Vendor</label>
+                    <input id="search-vendor" type="text" placeholder="e.g. Amazon">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="search-type">
+                        <option value="">All</option>
+                        <option value="DEPOSIT">Deposits</option>
+                        <option value="DEBIT">Payments</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="runCustomSearch()">Search</button>
+            </div>
+        </div>
+
+        <div id="report-results" style="margin-top:16px;"></div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
